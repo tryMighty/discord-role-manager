@@ -42,6 +42,10 @@ export class RoleManager {
         return;
       }
 
+      let successCount = 0;
+      let skipCount = 0;
+      let errorCount = 0;
+
       for (const userId of users) {
         if (this.action === 'add') {
           if (this.dryRun) {
@@ -50,8 +54,10 @@ export class RoleManager {
             try {
               await this.api.addRole(this.guildId, userId, this.roleId);
               logger.success(`Added role to user ${userId}`);
+              successCount++;
             } catch (err) {
               logger.error(`Failed to add role to user ${userId}: ${err.message}`);
+              errorCount++;
             }
           }
         } else if (this.action === 'remove') {
@@ -61,8 +67,10 @@ export class RoleManager {
             try {
               await this.api.removeRole(this.guildId, userId, this.roleId);
               logger.success(`Removed role from user ${userId}`);
+              successCount++;
             } catch (err) {
               logger.error(`Failed to remove role from user ${userId}: ${err.message}`);
+              errorCount++;
             }
           }
         }
@@ -73,8 +81,19 @@ export class RoleManager {
       }
 
       logger.info('Finished processing all users.');
+
+      console.log('\n--- Summary ---');
+      if (this.dryRun) {
+        console.log(`Total users found: ${users.length} (dry run - no changes made)`);
+      } else {
+        console.log(`Total users found: ${users.length}`);
+        console.log(`Roles ${this.action === 'add' ? 'added' : 'removed'}: ${successCount}`);
+        console.log(`Already had role / skipped: ${skipCount}`);
+        console.log(`Errors: ${errorCount}`);
+      }
     } catch (error) {
       logger.error(`RoleManager Error: ${error.message}`);
+      throw error;
     }
   }
 
@@ -83,7 +102,7 @@ export class RoleManager {
     let hasMore = true;
     while (hasMore) {
       const response = await this.api.getPollVoters(this.channelId, this.messageId, answerId, after);
-      const usersArray = response.users || response;
+      const usersArray = Array.isArray(response) ? response : (response.users || []);
       if (!usersArray || usersArray.length === 0) {
         hasMore = false;
         break;

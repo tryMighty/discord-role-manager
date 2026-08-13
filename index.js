@@ -293,35 +293,35 @@ class RoleManager {
   }
 }
 
-// ==========================================
-// CLI SETUP & EXECUTION
-// ==========================================
-const program = new Command();
-
-program
-  .name('discord-role-manager')
-  .description(pkg.description)
-  .version(pkg.version)
-  .requiredOption('-g, --guild <id>', 'Discord Server (Guild) ID')
-  .option('-c, --channel <id>', 'Discord Channel ID (optional, will search if not provided)')
-  .requiredOption('-m, --message <id>', 'Discord Message ID')
-  .requiredOption('-r, --role <id>', 'Discord Role ID to add/remove')
-  .requiredOption('-a, --action <action>', 'Action to perform: add or remove', (val) => {
-    const v = val.toLowerCase();
-    if (v !== 'add' && v !== 'remove') {
-      throw new Error('Action must be "add" or "remove"');
-    }
-    return v;
-  })
-  .option('-d, --dry-run', 'Show what would happen without actually changing roles', false);
-
-program.parse(process.argv);
-const options = program.opts();
-
 // Exporting classes for testing
 export { DiscordAPI, RoleManager, logger };
 
+// ==========================================
+// CLI SETUP & EXECUTION
+// ==========================================
 async function main() {
+  const program = new Command();
+
+  program
+    .name('discord-role-manager')
+    .description(pkg.description)
+    .version(pkg.version)
+    .requiredOption('-g, --guild <id>', 'Discord Server (Guild) ID')
+    .option('-c, --channel <id>', 'Discord Channel ID (optional, will search if not provided)')
+    .requiredOption('-m, --message <id>', 'Discord Message ID')
+    .requiredOption('-r, --role <id>', 'Discord Role ID to add/remove')
+    .requiredOption('-a, --action <action>', 'Action to perform: add or remove', (val) => {
+      const v = val.toLowerCase();
+      if (v !== 'add' && v !== 'remove') {
+        throw new Error('Action must be "add" or "remove"');
+      }
+      return v;
+    })
+    .option('-d, --dry-run', 'Show what would happen without actually changing roles', false);
+
+  program.parse(process.argv);
+  const options = program.opts();
+
   try {
     const token = process.env.DISCORD_TOKEN;
     if (!token) {
@@ -346,6 +346,6 @@ async function main() {
 }
 
 // Ensure main only runs if this file is executed directly (not when imported for testing)
-if (process.argv[1] && process.argv[1].endsWith('index.js')) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }

@@ -13,6 +13,11 @@ export class RoleManager {
 
   async execute() {
     try {
+      if (!this.channelId) {
+        logger.info(`Channel ID not provided. Searching for message ${this.messageId} in guild ${this.guildId}...`);
+        this.channelId = await this.api.findMessageChannel(this.guildId, this.messageId);
+      }
+
       logger.info(`Fetching message ${this.messageId} in channel ${this.channelId}...`);
       const message = await this.api.getMessage(this.channelId, this.messageId);
       

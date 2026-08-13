@@ -46,9 +46,40 @@ export class DiscordAPI {
         if (retries === 1) throw error;
         logger.warn(`Request failed, retrying... (${error.message})`);
         await new Promise(resolve => setTimeout(resolve, 2000));
-        retries--;
       }
     }
+  }
+
+  async getGuildChannels(guildId) {
+    return this.request(`/guilds/${guildId}/channels`);
+  }
+
+  async findMessageChannel(guildId, messageId) {
+    const channels = await this.getGuildChannels(guildId);
+    if (!channels || !Array.isArray(channels)) {
+      throw new Error('Failed to retrieve guild channels.');
+    }
+
+    // Filter to text-based channels that can have messages
+    const textChannels = channels.filter(c => c.type === 0 || c.type === 2 || c.type === 5 || c.type === 11 || c.type === 12);
+    
+    logger.info(`Searching for message ${messageId} across ${textChannels.length} text channels...`);
+    
+    for (const channel of textChannels) {
+      try {
+        const message = await this.getMessage(channel.id, messageId);
+        if (message && message.id === messageId) {
+          logger.success(`Found message in channel ${channel.id} (${channel.name})`);
+          return channel.id;
+        }
+      } catch (err) {
+        // Message not found in this channel or no access, ignore and continue
+        if (err.message.includes('10008') || err.message.includes('403') || err.message.includes('404')) {
+          continue;
+        }
+      }
+    }
+    throw new Error(`Message ${messageId} not found in any accessible channel in guild ${guildId}`);
   }
 
   async getMessage(channelId, messageId) {

@@ -16,7 +16,7 @@ program
   .description(pkg.description)
   .version(pkg.version)
   .requiredOption('-g, --guild <id>', 'Discord Server (Guild) ID')
-  .requiredOption('-c, --channel <id>', 'Discord Channel ID')
+  .option('-c, --channel <id>', 'Discord Channel ID (optional, will search if not provided)')
   .requiredOption('-m, --message <id>', 'Discord Message ID')
   .requiredOption('-r, --role <id>', 'Discord Role ID to add/remove')
   .requiredOption('-a, --action <action>', 'Action to perform: add or remove', (val) => {

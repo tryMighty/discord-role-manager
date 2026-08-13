@@ -1,88 +1,140 @@
-# Discord Role Manager
+# 🎮 Discord Role Manager Script
 
-A Node.js CLI tool that adds or removes a Discord role from users who reacted to a specified message or voted on a poll message.
+Welcome! If you want to automatically give (or remove) a specific Discord role to everyone who reacted to a message or voted on a poll, you've come to the right place!
 
-## Features
-- Works with message reactions and Discord polls.
-- Automatically handles pagination for fetching all users.
-- Handles Discord API rate limits gracefully.
-- Native fetch, zero heavy Discord libraries like discord.js.
-- Dry run support to test without making actual changes.
+This guide is designed to hold your hand through the entire process. Don't worry if you aren't a programmer—just follow these steps one by one, and you'll have it running in no time! 🚀
 
-## Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **Discord Bot**: A Discord application with a bot token.
+---
 
-### Getting a Discord Bot Token
-1. Go to the [Discord Developer Portal](https://discord.com/developers/applications).
-2. Create a "New Application".
-3. Navigate to the **Bot** tab on the left sidebar.
-4. Click "Reset Token" and copy your new token.
-5. Make sure the bot has the "Server Members Intent" enabled in the Privileged Gateway Intents section if necessary (usually only if fetching member details, but good to have).
-6. Invite the bot to your server: Go to **OAuth2 -> URL Generator**, select `bot` scope, and `Manage Roles` permission. Open the generated URL and authorize it for your server.
+## 🛠️ Step 1: Install Requirements
 
-### Important: Role Hierarchy
-Make sure your Bot's role is **above** the role it is trying to assign or remove in the Discord server settings!
+Before you can use this script, you need a program called **Node.js** installed on your computer. 
+Node.js is what runs JavaScript code outside of a web browser.
 
-## Setup
+1. Go to [https://nodejs.org](https://nodejs.org)
+2. Download and install the **LTS (Long Term Support)** version.
+3. Once installed, open your computer's terminal (Command Prompt or PowerShell on Windows, Terminal on Mac).
+4. Run this command to make sure it installed correctly:
+   ```bash
+   node -v
+   ```
+   *You should see a version number like `v18.x.x` or higher.*
 
-1. Clone or download this repository.
-2. Install dependencies:
+5. Now, navigate to the folder where you saved this project in your terminal. 
+6. Type the following command and hit Enter to install the required background packages:
    ```bash
    npm install
    ```
-3. Copy the `.env.example` file to `.env`:
+
+---
+
+## 🤖 Step 2: Get a Discord Bot Token
+
+To interact with Discord, the script acts like a "bot" in your server. You need to create a bot account and get its secret password, known as a **Token**.
+
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications).
+2. Click the **New Application** button in the top right. Give it a name (like "Role Manager") and click **Create**.
+3. On the left menu, click **Bot**.
+4. Look for the **"Reset Token"** button. Click it, confirm, and copy the long string of text it gives you. 
+   ⚠️ **CRITICAL:** *Never share this token with anyone! It is the password to your bot.*
+5. **Turn on Privileged Intents**: Scroll down on the Bot page until you see **Privileged Gateway Intents**. 
+   - Turn **ON** the "Server Members Intent".
+   - Turn **ON** the "Message Content Intent".
+   - Save your changes!
+
+---
+
+## 📩 Step 3: Invite the Bot to Your Server
+
+The bot needs to actually be inside your Discord server to manage roles.
+
+1. Still in the Developer Portal, click **OAuth2** on the left menu, then click **URL Generator**.
+2. Under "Scopes", check the box for **bot**.
+3. Under "Bot Permissions", check the box for **Manage Roles**.
+4. Scroll to the bottom and copy the **Generated URL**.
+5. Paste that URL into your web browser, select your server, and click **Authorize**.
+
+---
+
+## 🔑 Step 4: Find Your IDs
+
+Discord uses unique number strings (IDs) to identify things like your server, roles, and messages. You'll need to find these numbers.
+
+### Enable Developer Mode in Discord
+You must turn this on to see IDs:
+1. Open your Discord app.
+2. Go to **User Settings** (the gear icon near your name).
+3. Go to **Advanced** (under App Settings).
+4. Turn on **Developer Mode**.
+
+### Find Your Server ID
+1. Right-click your server's icon on the very left side of Discord.
+2. Click **Copy Server ID**.
+
+### Find Your Role ID
+1. Go to your server settings -> **Roles**.
+2. Right-click the role you want to add/remove and click **Copy Role ID**.
+   *(Note: Make sure your bot's role is HIGHER on the role list than the role it is trying to give out, or Discord will block it!)*
+
+### Find Your Message ID
+1. Go to the channel with the message or poll you want to check.
+2. Right-click the message and click **Copy Message ID**.
+
+---
+
+## ✍️ Step 5: Put the IDs into the Script
+
+Now it's time to open the script file!
+
+1. Open the file named `index.js` in a text editor (Notepad, VS Code, or TextEdit).
+2. Right at the very top of the file, you will see the **🛠️ CONFIGURATION ZONE 🛠️**.
+3. It looks like this:
+
+```javascript
+// 1. Your Discord Bot Token 
+const CONFIG_DISCORD_TOKEN = process.env.DISCORD_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+
+// 2. The ID of your Discord Server
+const CONFIG_GUILD_ID      = 'YOUR_SERVER_ID_HERE';
+
+// 3. The ID of the specific message or poll with the reactions
+const CONFIG_MESSAGE_ID    = 'YOUR_MESSAGE_ID_HERE';
+
+// 4. The ID of the role you want to add or remove
+const CONFIG_ROLE_ID       = 'YOUR_ROLE_ID_HERE';
+```
+
+4. Replace `'YOUR_BOT_TOKEN_HERE'` with the Bot Token you got in Step 2. (Keep the single quotes around it!)
+5. Do the same for your Server ID, Message ID, and Role ID.
+6. By default, `CONFIG_ACTION` is set to `'add'`, which means it gives the role. If you want to take a role away, change it to `'remove'`.
+7. **Save the file!**
+
+---
+
+## 🚀 Step 6: Run the Script!
+
+You're finally ready!
+
+1. Go back to your terminal window.
+2. Run the script by typing:
    ```bash
-   cp .env.example .env
-   ```
-4. Edit `.env` and add your bot token:
-   ```env
-   DISCORD_TOKEN=your_token_here
+   node index.js
    ```
 
-## Finding IDs in Discord
-To use this CLI, you will need several IDs from Discord. You must enable **Developer Mode** in Discord to copy these IDs.
-- *Enable Developer Mode*: Go to User Settings -> Advanced -> toggle "Developer Mode".
-- **Guild ID**: Right-click the server icon on the left -> Copy Server ID.
-- **Channel ID**: Right-click the channel name -> Copy Channel ID.
-- **Message ID**: Right-click the message -> Copy Message ID.
-- **Role ID**: Go to Server Settings -> Roles -> right-click the role -> Copy Role ID.
+You will see beautiful, colorful text telling you exactly what the script is doing. It will search for your message, find everyone who reacted or voted, and begin giving out the role! 
 
-## Usage
+Once it's finished, it will print a neat summary of exactly how many people were processed.
 
-```bash
-node index.js --guild <server-id> --channel <channel-id> --message <message-id> --role <role-id> --action <add|remove>
+---
+
+## 🛡️ Dry Run Mode (Optional)
+
+If you are nervous and just want to see *who* would get the role without actually giving it to them, you can change this line in the Configuration Zone:
+
+```javascript
+const CONFIG_DRY_RUN       = false; 
 ```
+Change `false` to `true`. When you run the script, it will pretend to add the roles and tell you what it *would* have done!
 
-### Options
-- `-g, --guild <id>` : Discord Server (Guild) ID
-- `-c, --channel <id>` : Discord Channel ID
-- `-m, --message <id>` : Discord Message ID
-- `-r, --role <id>` : Discord Role ID to add/remove
-- `-a, --action <action>` : Action to perform: `add` or `remove`
-- `-d, --dry-run` : Show what would happen without actually changing roles
-- `-h, --help` : Show help message
-
-### Examples
-
-**Add a role to all users who reacted to a message:**
-```bash
-node index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a add
-```
-
-**Remove a role from all users who reacted to a message:**
-```bash
-node index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a remove
-```
-
-**Test what would happen (Dry Run):**
-```bash
-node index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a add --dry-run
-```
-
-## Troubleshooting
-- **Failed to add role**: This usually means the bot doesn't have the `Manage Roles` permission, or the bot's highest role is lower than the role you are trying to assign.
-- **Message not found**: Make sure the Channel ID and Message ID are correct and that the bot has permission to view the channel where the message is located.
-
-## License
-MIT License.
+---
+*Happy managing!* 🎉

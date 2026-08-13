@@ -1,4 +1,3 @@
-import { Command } from 'commander';
 import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 
@@ -6,9 +5,30 @@ dotenv.config();
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)));
 
-// ==========================================
-// LOGGER
-// ==========================================
+// ============================================================================
+// 🛠️ CONFIGURATION ZONE 🛠️
+// Swap in your new variables below to use the script.
+// Follow the README for a step-by-step guide on how to find these IDs.
+// ============================================================================
+
+// 1. Your Discord Bot Token (can also be set in a .env file as DISCORD_TOKEN)
+const CONFIG_DISCORD_TOKEN = process.env.DISCORD_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+
+// 2. The ID of your Discord Server
+const CONFIG_GUILD_ID      = 'YOUR_SERVER_ID_HERE';
+
+// 3. The ID of the specific message or poll with the reactions
+const CONFIG_MESSAGE_ID    = 'YOUR_MESSAGE_ID_HERE';
+
+// 4. The ID of the role you want to add or remove
+const CONFIG_ROLE_ID       = 'YOUR_ROLE_ID_HERE';
+
+// 5. The action you want to perform: type 'add' to give the role, or 'remove' to take it away
+const CONFIG_ACTION        = 'add'; 
+
+// 6. Set to true if you want to test the script without actually changing any roles
+const CONFIG_DRY_RUN       = false; 
+// ============================================================================
 const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
@@ -297,46 +317,40 @@ class RoleManager {
 export { DiscordAPI, RoleManager, logger };
 
 // ==========================================
-// CLI SETUP & EXECUTION
+// SCRIPT EXECUTION
 // ==========================================
 async function main() {
-  const program = new Command();
-
-  program
-    .name('discord-role-manager')
-    .description(pkg.description)
-    .version(pkg.version)
-    .requiredOption('-g, --guild <id>', 'Discord Server (Guild) ID')
-    .option('-c, --channel <id>', 'Discord Channel ID (optional, will search if not provided)')
-    .requiredOption('-m, --message <id>', 'Discord Message ID')
-    .requiredOption('-r, --role <id>', 'Discord Role ID to add/remove')
-    .requiredOption('-a, --action <action>', 'Action to perform: add or remove', (val) => {
-      const v = val.toLowerCase();
-      if (v !== 'add' && v !== 'remove') {
-        throw new Error('Action must be "add" or "remove"');
-      }
-      return v;
-    })
-    .option('-d, --dry-run', 'Show what would happen without actually changing roles', false);
-
-  program.parse(process.argv);
-  const options = program.opts();
-
   try {
-    const token = process.env.DISCORD_TOKEN;
-    if (!token) {
-      logger.error('DISCORD_TOKEN environment variable is not set. Please check your .env file.');
+    if (!CONFIG_DISCORD_TOKEN || CONFIG_DISCORD_TOKEN === 'YOUR_BOT_TOKEN_HERE') {
+      logger.error('Discord Bot Token is missing! Please put your token in the CONFIGURATION ZONE.');
+      process.exit(1);
+    }
+    
+    if (CONFIG_GUILD_ID === 'YOUR_SERVER_ID_HERE' || CONFIG_MESSAGE_ID === 'YOUR_MESSAGE_ID_HERE' || CONFIG_ROLE_ID === 'YOUR_ROLE_ID_HERE') {
+      logger.error('You need to fill in your Guild ID, Message ID, and Role ID in the CONFIGURATION ZONE.');
+      process.exit(1);
+    }
+
+    const action = CONFIG_ACTION.toLowerCase();
+    if (action !== 'add' && action !== 'remove') {
+      logger.error('Action must be either "add" or "remove"');
       process.exit(1);
     }
 
     logger.info(`Starting Discord Role Manager v${pkg.version}`);
-    logger.info(`Action: ${options.action.toUpperCase()}`);
-    if (options.dryRun) {
+    logger.info(`Action: ${action.toUpperCase()}`);
+    if (CONFIG_DRY_RUN) {
       logger.info('DRY RUN MODE ENABLED - No roles will actually be changed');
     }
 
-    const api = new DiscordAPI(token);
-    const manager = new RoleManager(api, options);
+    const api = new DiscordAPI(CONFIG_DISCORD_TOKEN);
+    const manager = new RoleManager(api, {
+      guild: CONFIG_GUILD_ID,
+      message: CONFIG_MESSAGE_ID,
+      role: CONFIG_ROLE_ID,
+      action: action,
+      dryRun: CONFIG_DRY_RUN
+    });
 
     await manager.execute();
   } catch (err) {

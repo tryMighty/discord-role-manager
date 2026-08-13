@@ -1,0 +1,18 @@
+{
+  "name": "discord-role-manager",
+  "version": "1.0.0",
+  "description": "CLI tool to add/remove Discord roles from message reactors and poll voters",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}

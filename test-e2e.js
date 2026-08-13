@@ -1,6 +1,4 @@
-import { DiscordAPI } from './src/discord-api.js';
-import { RoleManager } from './src/role-manager.js';
-import { logger } from './src/logger.js';
+import { DiscordAPI, RoleManager, logger } from './index.js';
 
 // Mock Discord API
 class MockDiscordAPI {

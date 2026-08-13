@@ -51,7 +51,7 @@ To use this CLI, you will need several IDs from Discord. You must enable **Devel
 ## Usage
 
 ```bash
-node src/index.js --guild <server-id> --channel <channel-id> --message <message-id> --role <role-id> --action <add|remove>
+node index.js --guild <server-id> --channel <channel-id> --message <message-id> --role <role-id> --action <add|remove>
 ```
 
 ### Options
@@ -67,17 +67,17 @@ node src/index.js --guild <server-id> --channel <channel-id> --message <message-
 
 **Add a role to all users who reacted to a message:**
 ```bash
-node src/index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a add
+node index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a add
 ```
 
 **Remove a role from all users who reacted to a message:**
 ```bash
-node src/index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a remove
+node index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a remove
 ```
 
 **Test what would happen (Dry Run):**
 ```bash
-node src/index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a add --dry-run
+node index.js -g 123456789 -c 987654321 -m 1122334455 -r 5566778899 -a add --dry-run
 ```
 
 ## Troubleshooting
